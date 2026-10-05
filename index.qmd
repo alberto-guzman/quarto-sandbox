@@ -1,0 +1,86 @@
+---
+title: "Try Quarto in Your Browser"
+subtitle: "AIR TRACE — no install, no login"
+format: live-html
+engine: knitr
+toc: true
+---
+
+{{< include _extensions/r-wasm/live/_knitr.qmd >}}
+
+This page runs **real R in your browser**. Nothing to install, no account. The
+first cell takes a few seconds to load R the first time, then it's quick.
+
+Edit any code below and click **Run Code**. You can't break anything — reload the
+page to reset.
+
+## 1. Run some R
+
+Click **Run Code**. Then change `2 + 2` to any math you like and run it again.
+
+```{webr}
+2 + 2
+```
+
+## 2. Fit a model, then change it
+
+This cell builds a small example dataset and fits a model of well-being on age.
+Click **Run Code** to see the result.
+
+```{webr}
+#| autorun: true
+set.seed(42)
+n <- 120
+age    <- runif(n, 20, 65)
+educ   <- 24 - 0.18 * age + rnorm(n, 0, 1.5)   # education correlated with age
+female <- rbinom(n, 1, 0.5)
+wellbeing <- 20 + 0.9 * age + 3.0 * educ - 3.4 * female + rnorm(n, 0, 15)
+dat <- data.frame(wellbeing, age, female, educ)
+
+model <- lm(wellbeing ~ age, data = dat)
+summary(model)
+```
+
+**Now change the model.** In the cell above, replace this line:
+
+```r
+model <- lm(wellbeing ~ age, data = dat)
+```
+
+with this one, then click **Run Code** again:
+
+```r
+model <- lm(wellbeing ~ age + female + educ, data = dat)
+```
+
+The age coefficient roughly doubles. That is the whole idea: change the analysis,
+re-run, and the results follow. In a full Quarto report, the writing follows too.
+
+## 3. The writing follows the model
+
+This cell writes a sentence from the numbers, not by hand. Run it, then change the
+model in the cell above, re-run **this** cell, and watch the sentence update.
+
+```{webr}
+b_age <- coef(model)[["age"]]
+r2    <- summary(model)$r.squared
+sprintf(
+  "Each additional year of age is associated with a %.2f-point change in well-being. The model explains %.1f%% of the variation.",
+  b_age, 100 * r2
+)
+```
+
+## 4. Make a figure
+
+Run this to plot the data and the fitted line.
+
+```{webr}
+plot(dat$age, dat$wellbeing,
+     xlab = "Age", ylab = "Well-being", pch = 19, col = "#006E9F")
+abline(lm(wellbeing ~ age, data = dat), col = "#C00000", lwd = 2)
+```
+
+---
+
+That's Quarto's engine, running with zero setup. In RStudio or Positron you get
+the same thing, plus Word, PDF, and HTML output and the AIR template.
